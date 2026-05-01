@@ -1,0 +1,18 @@
+{
+  "name": "living-memory",
+  "owner": {
+    "name": "Kruvxyz",
+    "email": "golaiet@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "living-memory",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/Kruvxyz/living-memory.git",
+        "ref": "worktree-declarative-percolating-sparkle"
+      },
+      "description": "Query past Claude Code sessions as living memories."
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "living-memory",
+  "version": "0.1.0",
+  "description": "Query past Claude Code sessions as living memories. Indexes every session and lets the agent ask questions about specific past sessions via claude --resume.",
+  "author": {
+    "name": "Kruvxyz",
+    "email": "golaiet@gmail.com"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/Kruvxyz/living-memory",
+  "keywords": ["memory", "session", "context", "history"]
+}
