@@ -32,8 +32,11 @@ def extract_user_messages(messages: List[Dict[str, Any]]) -> List[str]:
     user_texts = []
     for msg in messages:
         if msg.get("type") == "user":
-            content = msg.get("message", {}).get("content", [])
-            if isinstance(content, list):
+            content = msg.get("message", {}).get("content", "")
+            # Content can be either string or list
+            if isinstance(content, str) and content:
+                user_texts.append(content)
+            elif isinstance(content, list):
                 for item in content:
                     if isinstance(item, dict) and item.get("type") == "text":
                         text = item.get("text", "")
@@ -102,3 +105,30 @@ def extract_message_count(messages: List[Dict[str, Any]]) -> int:
         if msg.get("type") in ("user", "assistant"):
             count += 1
     return count
+
+
+def extract_timestamps(messages: List[Dict[str, Any]]) -> tuple[str, str]:
+    """
+    Extract session start and end timestamps from transcript.
+
+    Returns (started_at, ended_at) ISO 8601 strings.
+    Uses first and last entry timestamps if available.
+    """
+    started_at = ""
+    ended_at = ""
+
+    # Find first timestamp (session start)
+    for msg in messages:
+        ts = msg.get("timestamp", "")
+        if ts:
+            started_at = ts
+            break
+
+    # Find last timestamp (session end)
+    for msg in reversed(messages):
+        ts = msg.get("timestamp", "")
+        if ts:
+            ended_at = ts
+            break
+
+    return started_at, ended_at
