@@ -11,6 +11,7 @@ from transcript import (
     extract_assistant_messages,
     extract_files_touched,
     extract_message_count,
+    extract_timestamps,
 )
 from redact import redact
 
@@ -35,19 +36,16 @@ def index_session(payload: Dict[str, Any]) -> None:
     Index a session from the SessionEnd hook payload.
 
     Expected payload fields:
-    - sessionId: unique session identifier
-    - startedAt: ISO timestamp
-    - endedAt: ISO timestamp
+    - session_id: unique session identifier
     - cwd: current working directory
-    - transcript: path to transcript file (optional, will compute if missing)
+    - transcript_path: path to transcript file
 
     Reads the transcript, extracts metadata, redacts secrets, and appends to index.
+    Timestamps are extracted from the transcript, not the hook payload.
     """
-    session_id = payload.get("sessionId", "unknown")
-    started_at = payload.get("startedAt", "")
-    ended_at = payload.get("endedAt", "")
+    session_id = payload.get("session_id", "unknown")
     cwd = payload.get("cwd", "")
-    transcript_path = payload.get("transcript", "")
+    transcript_path = payload.get("transcript_path", "")
 
     # If transcript path not provided, try to find it
     if not transcript_path:
@@ -62,6 +60,7 @@ def index_session(payload: Dict[str, Any]) -> None:
         return
 
     # Extract metadata
+    started_at, ended_at = extract_timestamps(messages)
     user_messages = extract_user_messages(messages)
     assistant_messages = extract_assistant_messages(messages)
     files = extract_files_touched(messages)
