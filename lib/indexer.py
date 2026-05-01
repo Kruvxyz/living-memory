@@ -49,7 +49,7 @@ def index_session(payload: Dict[str, Any]) -> None:
 
     # If transcript path not provided, try to find it
     if not transcript_path:
-        transcript_path = find_transcript(session_id, started_at)
+        transcript_path = find_transcript(session_id)
 
     if not transcript_path or not os.path.exists(transcript_path):
         return
@@ -59,7 +59,7 @@ def index_session(payload: Dict[str, Any]) -> None:
     if not messages:
         return
 
-    # Extract metadata
+    # Extract metadata (timestamps from transcript, not hook payload)
     started_at, ended_at = extract_timestamps(messages)
     user_messages = extract_user_messages(messages)
     assistant_messages = extract_assistant_messages(messages)
@@ -89,7 +89,7 @@ def index_session(payload: Dict[str, Any]) -> None:
         pass
 
 
-def find_transcript(session_id: str, started_at: Optional[str] = None) -> Optional[str]:
+def find_transcript(session_id: str) -> Optional[str]:
     """
     Attempt to find transcript file for a session.
 

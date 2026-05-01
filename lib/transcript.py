@@ -50,8 +50,11 @@ def extract_assistant_messages(messages: List[Dict[str, Any]]) -> List[str]:
     assistant_texts = []
     for msg in messages:
         if msg.get("type") == "assistant":
-            content = msg.get("message", {}).get("content", [])
-            if isinstance(content, list):
+            content = msg.get("message", {}).get("content", "")
+            # Content can be either string or list
+            if isinstance(content, str) and content:
+                assistant_texts.append(content)
+            elif isinstance(content, list):
                 for item in content:
                     if isinstance(item, dict) and item.get("type") == "text":
                         text = item.get("text", "")
