@@ -72,7 +72,7 @@ skill becomes available to the agent. Zero manual config.
 │  Main agent invokes skill: recall("X")                      │
 │       │                                                     │
 │       ▼                                                     │
-│  Skill reads ~/.living-memory/index.jsonl                   │
+│  Skill reads ~/.claude/.living-memory/index.jsonl           │
 │  Returns: [{session_id, date, cwd, first_msg}, ...]         │
 │       │                                                     │
 │       ▼                                                     │
@@ -95,7 +95,7 @@ skill becomes available to the agent. Zero manual config.
 │    3. Extract: session_id, started_at, ended_at, cwd,       │
 │       first_user_msg (truncated), last_assistant_msg        │
 │       (truncated), files_touched (from tool calls)          │
-│    4. Append line to ~/.living-memory/index.jsonl           │
+│    4. Append line to ~/.claude/.living-memory/index.jsonl   │
 │    5. Exit 0 (always — never block session end)             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -107,7 +107,8 @@ your own structure — these paths are required for `/plugin install` to
 work correctly.
 
 ```
-living-memory/
+├── .claude-plugin/
+│   └── living-memory/
 ├── .claude-plugin/
 │   └── plugin.json              # REQUIRED: plugin manifest
 │
@@ -124,7 +125,7 @@ living-memory/
 │
 ├── lib/
 │   ├── __init__.py
-│   ├── paths.py                 # Resolve ~/.claude, ~/.living-memory
+│   ├── paths.py                 # Resolve ~/.claude, ~/.claude/.living-memory
 │   ├── transcript.py            # Read & parse Claude Code transcripts
 │   ├── indexer.py               # Used by session_end.py
 │   ├── search.py                # Used by recall.py
@@ -253,7 +254,7 @@ current session's context. Common cues:
 
 ## Data Schema
 
-### Index file: `~/.living-memory/index.jsonl`
+### Index file: `~/.claude/.living-memory/index.jsonl`
 
 One JSON object per line, append-only:
 
@@ -301,7 +302,7 @@ distribution path works before you build features on top of it.
    import sys, json, os, datetime
    try:
        data = json.load(sys.stdin)
-       log_path = os.path.expanduser("~/.living-memory/hook-debug.log")
+       log_path = os.path.expanduser("~/.claude/.living-memory/hook-debug.log")
        os.makedirs(os.path.dirname(log_path), exist_ok=True)
        with open(log_path, "a") as f:
            f.write(f"{datetime.datetime.now().isoformat()} {json.dumps(data)}\n")
@@ -323,7 +324,7 @@ distribution path works before you build features on top of it.
    /plugin install https://github.com/<owner>/living-memory
    ```
    Restart Claude Code. Run a session, exit it. Check that
-   `~/.living-memory/hook-debug.log` exists and contains the payload.
+   `~/.claude/.living-memory/hook-debug.log` exists and contains the payload.
 
 **Done when:**
 - `/plugin install` succeeds without errors.
@@ -341,8 +342,8 @@ distribution path works before you build features on top of it.
 
 1. `lib/paths.py` — resolve:
    - `~/.claude/projects/` (Claude Code transcript root)
-   - `~/.living-memory/` (our data dir, create if missing)
-   - `~/.living-memory/index.jsonl`
+   - `~/.claude/.living-memory/` (our data dir, create if missing)
+   - `~/.claude/.living-memory/index.jsonl`
 
 2. **Inspect a real transcript** before writing `transcript.py`:
    ```bash
@@ -370,7 +371,7 @@ distribution path works before you build features on top of it.
    - Reads transcript via `transcript.py`.
    - Extracts schema fields above.
    - Runs redaction pass on text fields.
-   - Appends JSON line to `~/.living-memory/index.jsonl`.
+   - Appends JSON line to `~/.claude/.living-memory/index.jsonl`.
 
 6. Replace `hooks/session_end.py` stub with the real implementation:
    ```python
@@ -383,7 +384,7 @@ distribution path works before you build features on top of it.
        payload = json.load(sys.stdin)
        index_session(payload)
    except Exception as e:
-       err_path = os.path.expanduser("~/.living-memory/errors.log")
+       err_path = os.path.expanduser("~/.claude/.living-memory/errors.log")
        os.makedirs(os.path.dirname(err_path), exist_ok=True)
        with open(err_path, "a") as f:
            f.write(f"{e}\n")
@@ -391,7 +392,7 @@ distribution path works before you build features on top of it.
    ```
 
 **Done when:** You manually exit a Claude Code session and see a new
-correctly-formed line in `~/.living-memory/index.jsonl`.
+correctly-formed line in `~/.claude/.living-memory/index.jsonl`.
 
 ### Phase 2: Recall (1 hour)
 
