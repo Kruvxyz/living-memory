@@ -4,8 +4,11 @@ import os
 import json
 import argparse
 
-# Add lib to path
-lib_path = os.path.join(os.environ.get("CLAUDE_PLUGIN_ROOT", "."), "lib")
+# Add lib to path (resolve from script location if CLAUDE_PLUGIN_ROOT not set)
+_PLUGIN_ROOT = os.environ.get("CLAUDE_PLUGIN_ROOT") or os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "..")
+)
+lib_path = os.path.join(_PLUGIN_ROOT, "lib")
 sys.path.insert(0, lib_path)
 
 from query import query_session, QueryError, SessionNotFoundError, CLINotFoundError, TimeoutError
